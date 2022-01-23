@@ -94,7 +94,7 @@ public class ErrorResponseException extends RuntimeException
      *
      * @return The discord error code.
      *
-     * @see <a href="https://discord.com/developers/docs/topics/response-codes#json-error-response" target="_blank">Discord Error Codes</a>
+     * @see <a href="https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes" target="_blank">Discord Error Codes</a>
      */
     public int getErrorCode()
     {
@@ -190,6 +190,11 @@ public class ErrorResponseException extends RuntimeException
         // check what kind of errors we are dealing with
         for (String name : errors.keys())
         {
+            if (name.equals("_errors"))
+            {
+                schemaErrors.add(parseSchemaError(currentLocation, errors));
+                continue;
+            }
             DataObject schemaError = errors.getObject(name);
             if (!schemaError.isNull("_errors"))
             {
@@ -438,7 +443,7 @@ public class ErrorResponseException extends RuntimeException
         @Override
         public String toString()
         {
-            return location + "\n\t- " + errors.stream().map(Object::toString).collect(Collectors.joining("\n\t- "));
+            return (location.isEmpty() ? "" : location+"\n") + "\t- " + errors.stream().map(Object::toString).collect(Collectors.joining("\n\t- "));
         }
     }
 }

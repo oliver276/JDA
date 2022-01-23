@@ -450,9 +450,13 @@ public interface Guild extends ISnowflake
      * <br>This will include deprecated voice regions by default.
      *
      * @return {@link net.dv8tion.jda.api.requests.RestAction RestAction} - Type {@link java.util.EnumSet EnumSet}
+     *
+     * @deprecated Guilds no longer have the {@link net.dv8tion.jda.api.Region Region} option. Use {@link VoiceChannel#getRegion()} instead.
      */
     @Nonnull
     @CheckReturnValue
+    @Deprecated
+    @ForRemoval(deadline = "5.0.0")
     default RestAction<EnumSet<Region>> retrieveRegions()
     {
         return retrieveRegions(true);
@@ -465,9 +469,13 @@ public interface Guild extends ISnowflake
      *         Whether to include deprecated regions
      *
      * @return {@link net.dv8tion.jda.api.requests.RestAction RestAction} - Type {@link java.util.EnumSet EnumSet}
+     *
+     * @deprecated Guilds no longer have the {@link net.dv8tion.jda.api.Region Region} option. Use {@link VoiceChannel#getRegion()} instead.
      */
     @Nonnull
     @CheckReturnValue
+    @Deprecated
+    @ForRemoval(deadline = "5.0.0")
     RestAction<EnumSet<Region>> retrieveRegions(boolean includeDeprecated);
 
     /**
@@ -1070,6 +1078,7 @@ public interface Guild extends ISnowflake
      * @deprecated Guilds no longer have the {@link net.dv8tion.jda.api.Region Region} option. Use {@link VoiceChannel#getRegion()} instead.
      */
     @Deprecated
+    @ForRemoval(deadline = "5.0.0")
     @ReplaceWith("VoiceChannel.getRegion()")
     @DeprecatedSince("4.3.0")
     @Nonnull
@@ -1090,6 +1099,7 @@ public interface Guild extends ISnowflake
      * @deprecated Guilds no longer have the {@link net.dv8tion.jda.api.Region Region} option. Use {@link VoiceChannel#getRegion()} instead.
      */
     @Deprecated
+    @ForRemoval(deadline = "5.0.0")
     @ReplaceWith("VoiceChannel.getRegionRaw()")
     @DeprecatedSince("4.3.0")
     @Nonnull
@@ -1115,6 +1125,17 @@ public interface Guild extends ISnowflake
      */
     @Nonnull
     Member getSelfMember();
+
+    /**
+     * Returns the NSFW Level that this guild is classified with.
+     * <br>For a short description of the different values, see {@link net.dv8tion.jda.api.entities.Guild.NSFWLevel NSFWLevel}.
+     * <p>
+     * This value can only be modified by Discord after reviewing the Guild.
+     *
+     * @return The NSFWLevel of this guild.
+     */
+    @Nonnull
+    NSFWLevel getNSFWLevel();
 
     /**
      * Gets the Guild specific {@link net.dv8tion.jda.api.entities.Member Member} object for the provided
@@ -2465,8 +2486,8 @@ public interface Guild extends ISnowflake
 
     /**
      * Retrieves a {@link net.dv8tion.jda.api.entities.Guild.Ban Ban} of the provided ID
-     * <br>If you wish to ban or unban a user, use either {@link #ban(String, int)} ban(id, int)} or
-     * {@link #unban(String)} unban(id)}.
+     * <br>If you wish to ban or unban a user, use either {@link #ban(String, int) ban(id, int)} or
+     * {@link #unban(String) unban(id)}.
      *
      * <p>Possible {@link net.dv8tion.jda.api.requests.ErrorResponse ErrorResponses} caused by
      * the returned {@link net.dv8tion.jda.api.requests.RestAction RestAction} include the following:
@@ -2960,6 +2981,7 @@ public interface Guild extends ISnowflake
      */
     @Nonnull
     @Deprecated
+    @ForRemoval(deadline = "5.0.0")
     @DeprecatedSince("4.2.0")
     @ReplaceWith("loadMembers(Consumer<Member>) or loadMembers()")
     CompletableFuture<Void> retrieveMembers();
@@ -5870,6 +5892,70 @@ public interface Guild extends ISnowflake
     }
 
     /**
+     * Represents the NSFW level for this guild.
+     */
+    enum NSFWLevel
+    {
+        /**
+         * Discord has not rated this guild.
+         */
+        DEFAULT(0),
+        /**
+         * Is classified as a NSFW server
+         */
+        EXPLICIT(1),
+        /**
+         * Doesn't classify as a NSFW server
+         */
+        SAFE(2),
+        /**
+         * Is classified as NSFW and has an age restriction in place
+         */
+        AGE_RESTRICTED(3),
+        /**
+         * Placeholder for unsupported levels.
+         */
+        UNKNOWN(-1);
+
+        private final int key;
+
+        NSFWLevel(int key)
+        {
+            this.key = key;
+        }
+
+        /**
+         * The Discord id key used to represent this NSFW level.
+         *
+         * @return Integer id for this NSFW level.
+         */
+        public int getKey()
+        {
+            return key;
+        }
+
+        /**
+         * Used to retrieve a {@link net.dv8tion.jda.api.entities.Guild.NSFWLevel NSFWLevel} based
+         * on the Discord id key.
+         *
+         * @param  key
+         *         The Discord id key representing the requested NSFWLevel.
+         *
+         * @return The NSFWLevel related to the provided key, or {@link #UNKNOWN NSFWLevel.UNKNOWN} if the key is not recognized.
+         */
+        @Nonnull
+        public static NSFWLevel fromKey(int key)
+        {
+            for (NSFWLevel level : values())
+            {
+                if (level.getKey() == key)
+                    return level;
+            }
+            return UNKNOWN;
+        }
+    }
+
+    /**
      * The boost tier for this guild.
      * <br>Each tier unlocks new perks for a guild that can be seen in the {@link #getFeatures() features}.
      *
@@ -5889,12 +5975,12 @@ public interface Guild extends ISnowflake
         TIER_1(1, 128000, 100),
         /**
          * The second tier.
-         * <br>Unlocked at 15 boosters.
+         * <br>Unlocked at 7 boosters.
          */
         TIER_2(2, 256000, 150),
         /**
          * The third tier.
-         * <br>Unlocked at 30 boosters.
+         * <br>Unlocked at 14 boosters.
          */
         TIER_3(3, 384000, 250),
         /**
@@ -5939,10 +6025,10 @@ public interface Guild extends ISnowflake
          * The maximum amount of emotes a guild can have when this tier is reached.
          *
          * @return The maximum emotes
-         * 
+         *
          * @see    net.dv8tion.jda.api.entities.Guild#getMaxEmotes()
          */
-        public int getMaxEmotes() 
+        public int getMaxEmotes()
         {
             return maxEmotes;
         }
