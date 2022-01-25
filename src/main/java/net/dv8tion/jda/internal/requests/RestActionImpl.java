@@ -69,6 +69,8 @@ public class RestActionImpl<T> implements RestAction<T>
     private long deadline = 0;
     private Object rawData;
     private BooleanSupplier checks;
+    private boolean retryOnServerError = true;
+    private boolean retryOnTimeout = true;
 
     public static void setPassContext(boolean enable)
     {
@@ -144,6 +146,7 @@ public class RestActionImpl<T> implements RestAction<T>
         this.route = route;
         this.data = data;
         this.handler = handler;
+        this.retryOnTimeout = this.api.getRequester().isRetryOnTimeout();
     }
 
     public RestActionImpl<T> priority()
@@ -182,6 +185,22 @@ public class RestActionImpl<T> implements RestAction<T>
         return this;
     }
 
+    @Nonnull
+    @Override
+    public RestAction<T> setRetryOnTimeout(boolean retryOnTimeout)
+    {
+        this.retryOnTimeout = retryOnTimeout;
+        return this;
+    }
+
+    @Nonnull
+    @Override
+    public RestAction<T> setRetryOnServerError(boolean retryOnServerError)
+    {
+        this.retryOnServerError = retryOnServerError;
+        return this;
+    }
+
     @Override
     public void queue(Consumer<? super T> success, Consumer<? super Throwable> failure)
     {
@@ -194,7 +213,7 @@ public class RestActionImpl<T> implements RestAction<T>
             success = DEFAULT_SUCCESS;
         if (failure == null)
             failure = DEFAULT_FAILURE;
-        api.getRequester().request(new Request<>(this, success, failure, finisher, true, data, rawData, getDeadline(), priority, route, headers));
+        api.getRequester().request(new Request<>(this, success, failure, finisher, true, data, rawData, getDeadline(), priority, route, headers, retryOnTimeout, retryOnServerError));
     }
 
     @Nonnull
@@ -206,7 +225,7 @@ public class RestActionImpl<T> implements RestAction<T>
         RequestBody data = finalizeData();
         CaseInsensitiveMap<String, String> headers = finalizeHeaders();
         BooleanSupplier finisher = getFinisher();
-        return new RestFuture<>(this, shouldQueue, finisher, data, rawData, getDeadline(), priority, route, headers);
+        return new RestFuture<>(this, shouldQueue, finisher, data, rawData, getDeadline(), priority, route, headers, retryOnTimeout, retryOnServerError);
     }
 
     @Override

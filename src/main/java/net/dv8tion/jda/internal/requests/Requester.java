@@ -217,7 +217,7 @@ public class Requester
                 }
                 catch (InterruptedException ignored) {}
             }
-            while (attempt < 3 && lastResponse.code() >= 500);
+            while (attempt < 3 && lastResponse.code() >= 500 && apiRequest.isRetryOnServerError());
 
             LOG.trace("Finished Request {} {} with code {}", route.getMethod(), lastResponse.request().url(), lastResponse.code());
 
@@ -248,7 +248,7 @@ public class Requester
         }
         catch (IOException e)
         {
-            if (retryOnTimeout && !retried && isRetry(e))
+            if (retryOnTimeout && !retried && isRetry(e) && apiRequest.isRetryOnTimeout())
                 return execute(apiRequest, true, handleOnRatelimit);
             LOG.error("There was an I/O error while executing a REST request: {}", e.getMessage());
             apiRequest.handleResponse(new Response(e, rays));
@@ -315,6 +315,10 @@ public class Requester
     public void setRetryOnTimeout(boolean retryOnTimeout)
     {
         this.retryOnTimeout = retryOnTimeout;
+    }
+
+    public boolean isRetryOnTimeout(){
+        return retryOnTimeout;
     }
 
     public boolean stop()

@@ -50,6 +50,8 @@ public class Request<T>
     private final CaseInsensitiveMap<String, String> headers;
     private final long deadline;
     private final boolean priority;
+    private final boolean retryOnTimeout;
+    private final boolean retryOnServerError;
 
     private final String localReason;
 
@@ -59,7 +61,7 @@ public class Request<T>
     public Request(
             RestActionImpl<T> restAction, Consumer<? super T> onSuccess, Consumer<? super Throwable> onFailure,
             BooleanSupplier checks, boolean shouldQueue, RequestBody body, Object rawBody, long deadline, boolean priority,
-            Route.CompiledRoute route, CaseInsensitiveMap<String, String> headers)
+            Route.CompiledRoute route, CaseInsensitiveMap<String, String> headers, boolean retryOnTimeout, boolean retryOnServerError)
     {
         this.deadline = deadline;
         this.priority = priority;
@@ -77,6 +79,8 @@ public class Request<T>
         this.rawBody = rawBody;
         this.route = route;
         this.headers = headers;
+        this.retryOnTimeout = retryOnTimeout;
+        this.retryOnServerError = retryOnServerError;
 
         this.api = (JDAImpl) restAction.getJDA();
         this.localReason = ThreadLocalReason.getCurrent();
@@ -182,6 +186,16 @@ public class Request<T>
     public boolean isPriority()
     {
         return priority;
+    }
+
+    public boolean isRetryOnTimeout()
+    {
+        return retryOnTimeout;
+    }
+
+    public boolean isRetryOnServerError()
+    {
+        return retryOnServerError;
     }
 
     public boolean isSkipped()

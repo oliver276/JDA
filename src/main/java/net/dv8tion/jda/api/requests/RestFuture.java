@@ -31,10 +31,10 @@ public class RestFuture<T> extends CompletableFuture<T>
 
     public RestFuture(final RestActionImpl<T> restAction, final boolean shouldQueue,
                       final BooleanSupplier checks, final RequestBody data, final Object rawData, final long deadline, final boolean priority,
-                      final Route.CompiledRoute route, final CaseInsensitiveMap<String, String> headers)
+                      final Route.CompiledRoute route, final CaseInsensitiveMap<String, String> headers, boolean retryOnTimeout, boolean retryOnServerError)
     {
         this.request = new Request<>(restAction, this::complete, this::completeExceptionally,
-                                     checks, shouldQueue, data, rawData, deadline, priority, route, headers);
+                                     checks, shouldQueue, data, rawData, deadline, priority, route, headers, retryOnTimeout, retryOnServerError);
         ((JDAImpl) restAction.getJDA()).getRequester().request(this.request);
     }
 

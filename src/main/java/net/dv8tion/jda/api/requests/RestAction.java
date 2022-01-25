@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.RateLimitedException;
 import net.dv8tion.jda.api.utils.Result;
 import net.dv8tion.jda.api.utils.concurrent.DelayedCompletableFuture;
+import net.dv8tion.jda.internal.requests.Requester;
 import net.dv8tion.jda.internal.requests.RestActionImpl;
 import net.dv8tion.jda.internal.requests.restaction.operator.*;
 import net.dv8tion.jda.internal.utils.Checks;
@@ -501,6 +502,43 @@ public interface RestAction<T>
      */
     @Nonnull
     default RestAction<T> deadline(long timestamp)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Whether this RestAction will be retried if the request times out.
+     * <br><i>Note that this is a network timeout where Discord takes too long to respond, not a timeout specified by {@link #timeout(long, TimeUnit)}</i>.
+     *
+     * <p>This will default to the value specified by {@link Requester#isRetryOnTimeout()} and {@link JDA#setRequestTimeoutRetry(boolean)}, which will default to {@code true}.
+     *
+     * <p>If this is true, the request will be retried once for a total of 2 attempts.
+     *
+     * @param  retryOnTimeout
+     *         True, if this request should be retried if it times out
+     *
+     * @return The same RestAction with the applied retryOnTimeout
+     */
+    @Nonnull
+    default RestAction<T> setRetryOnTimeout(boolean retryOnTimeout)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Whether this RestAction will be retried if Discord returns an error code.
+     *
+     * This is {@code true} by default.
+     *
+     * <p>If this is true, this request will be retried up to three times, for a total of 4 attempts if Discord returns an error code.
+     *
+     * @param  retryOnServerError
+     *         True, if this request should be retried if Discord returns an error code
+     *
+     * @return The same RestAction with the applied retryOnServerError
+     */
+    @Nonnull
+    default RestAction<T> setRetryOnServerError(boolean retryOnServerError)
     {
         throw new UnsupportedOperationException();
     }
